@@ -1,0 +1,59 @@
+<table
+  #table
+  cdk-table
+  multiTemplateDataRows
+  [dataSource]="dataSource"
+  cdkDropList
+  [cdkDropListData]="dataSource"
+  (cdkDropListDropped)="dropTable($event)"
+>
+  <ng-container *ngFor="let column of displayedColumns" [cdkColumnDef]="column">
+    <th cdk-header-cell *cdkHeaderCellDef>{{ column }}</th>
+    <td cdk-cell *cdkCellDef="let element">{{ element[column] }}</td>
+  </ng-container>
+
+  <ng-container cdkColumnDef="expandedDetail">
+    <td
+      cdk-cell
+      *cdkCellDef="let element"
+      [attr.colspan]="displayedColumns.length"
+    >
+      <div
+        class="example-element-detail"
+        [@detailExpand]="
+          expansionMap[element.position] ? 'expanded' : 'collapsed'
+        "
+      >
+        <div class="example-element-diagram">
+          <div class="example-element-position">{{ element.position }}</div>
+          <div class="example-element-symbol">{{ element.symbol }}</div>
+          <div class="example-element-name">{{ element.name }}</div>
+          <div class="example-element-weight">{{ element.weight }}</div>
+        </div>
+        <div class="example-element-description">
+          {{ element.description }}
+          <span class="example-element-description-attribution">
+            -- Wikipedia
+          </span>
+        </div>
+      </div>
+    </td>
+  </ng-container>
+
+  <!-- Position Column -->
+  <tr cdk-header-row *cdkHeaderRowDef="displayedColumns"></tr>
+  <tr
+    cdk-row
+    *cdkRowDef="let row; columns: displayedColumns"
+    cdkDrag
+    [cdkDragData]="row"
+    class="example-element-row"
+    [class.example-expanded-row]="expansionMap[row.position]"
+    (click)="handleRowClick(row)"
+  ></tr>
+  <tr
+    cdk-row
+    *cdkRowDef="let row; columns: ['expandedDetail']"
+    class="example-element-row"
+  ></tr>
+</table>
