@@ -1,8 +1,7 @@
-import { DataSource } from '@angular/cdk/collections';
-import { Component, ViewChild, OnInit } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
-import { CdkDragDrop, moveItemInArray, transferArrayItem, CdkDragHandle } from '@angular/cdk/drag-drop';
+import { Component, ViewChild, OnInit, Input } from '@angular/core';
+import { CdkDragDrop, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { CdkTable } from '@angular/cdk/table';
+
 import { PeriodicElement, PERIODIC_TABLE_DATA } from './periodic-table-data';
 import _ from 'lodash';
 import { animate, state, style, transition, trigger } from '@angular/animations';
@@ -24,8 +23,9 @@ import { animate, state, style, transition, trigger } from '@angular/animations'
 })
 export class PeriodicTable implements OnInit {
     @ViewChild('table', { static: false }) table: CdkTable<PeriodicElement>;
-    displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
-    dataSource = PERIODIC_TABLE_DATA;
+    @Input() dataSource: any = PERIODIC_TABLE_DATA;
+    @Input() displayedColumns: string[] = ['position', 'name', 'weight', 'symbol'];
+    @Input() showChild = true;
     expansionMap: any = {};
 
     ngOnInit() {
@@ -39,20 +39,12 @@ export class PeriodicTable implements OnInit {
     }
 
     dropTable(event: CdkDragDrop<PeriodicElement[]>) {
-        const prevIndex = this.dataSource.findIndex((d) => d === event.item.data);
-        moveItemInArray(this.dataSource, prevIndex, event.currentIndex);
+        if (event.previousContainer === event.container) {
+            const prevIndex = this.dataSource.findIndex((d) => d === event.item.data);
+            moveItemInArray(this.dataSource, prevIndex, event.currentIndex);
+        } else {
+            transferArrayItem(event.previousContainer.data, event.container.data, event.previousIndex, event.currentIndex);
+        }
         this.table.renderRows();
     }
-}
-
-export class ExampleDataSource extends DataSource<PeriodicElement> {
-    /** Stream of data that is provided to the table. */
-    data = new BehaviorSubject<PeriodicElement[]>(PERIODIC_TABLE_DATA);
-
-    /** Connect function called by the table to retrieve one stream containing the data to render. */
-    connect(): Observable<PeriodicElement[]> {
-        return this.data;
-    }
-
-    disconnect() {}
 }
